@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- STUDENT & FEE MANAGEMENT ---
+model Student {
+  id           String      @id @default(uuid())
+  rollNo       String      @unique
+  name         String
+  fatherName   String
+  className    String
+  section      String
+  monthlyFee   Float
+  admissionDate DateTime   @default(now())
+  fees         FeeRecord[]
+  isActive     Boolean     @default(true)
+}
+
+model FeeRecord {
+  id           String    @id @default(uuid())
+  studentId    String
+  student      Student   @relation(fields: [studentId], references: [id])
+  feeMonth     String    
+  amountPaid   Float
+  paymentDate  DateTime  @default(now())
+  paymentMode  String    // CASH, ONLINE, BANK
+}
+
+// --- ACCOUNTING & EXPENSES ---
+model Expense {
+  id          String   @id @default(uuid())
+  title       String   // e.g., "Electricity Bill", "Teacher Salary"
+  category    String   // UTILITY, SALARY, RENT, REPAIR, OTHER
+  amount      Float
+  date        DateTime @default(now())
+  description String?
+  recordedBy  String   // Admin Name
+}
+
+model PettyCash {
+  id          String   @id @default(uuid())
+  item        String   // e.g., "Chaye/Biscuit", "Stationery"
+  amount      Float
+  date        DateTime @default(now())
+  balanceLeft Float    // Remaining petty cash balance
+}
+
+model Admin {
+  id       String @id @default(uuid())
+  username String @unique
+  password String
+  role     String @default("ADMIN") // ADMIN, ACCOUNTANT
+}
