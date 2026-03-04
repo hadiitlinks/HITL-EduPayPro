@@ -3,13 +3,13 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  // Yahan apna Firebase config paste karen
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDLO2PF_seuO1Vq6VdI85tn-ubT83hYxqc",
+  authDomain: "hitl-edupaypro.firebaseapp.com",
+  projectId: "hitl-edupaypro",
+  storageBucket: "hitl-edupaypro.firebasestorage.app",
+  messagingSenderId: "1078957433543",
+  appId: "1:1078957433543:web:8f4d89a145de749c3414e2",
+  measurementId: "G-0ENQN66JL7"
 };
 
 const app = initializeApp(firebaseConfig);
