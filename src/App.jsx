@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { auth } from './firebase';
+import { auth, db } from './firebase'; // Imported db
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore'; // Imported Firestore methods
 import { 
   Menu, X, LayoutDashboard, UserPlus, Layers, 
   Receipt, TrendingDown, Settings as SettingsIcon, LogOut 
@@ -36,15 +37,24 @@ const App = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(themes.emerald);
 
+  // Persistence Logic: Load Theme from Firestore
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+      if (u) {
+        try {
+          const docSnap = await getDoc(doc(db, "settings", "schoolConfig"));
+          if (docSnap.exists() && docSnap.data().savedTheme) {
+            setCurrentTheme(docSnap.data().savedTheme);
+          }
+        } catch (err) {
+          console.error("Error loading saved theme:", err);
+        }
+      }
       setAuthLoading(false);
     });
 
-    // Mobile Fix: Force close loading after 4 seconds
     const timeout = setTimeout(() => setAuthLoading(false), 4000);
-
     return () => { unsub(); clearTimeout(timeout); };
   }, []);
 
@@ -57,7 +67,6 @@ const App = () => {
     );
   }
 
-  // Yahan redirect to Login fixed hai
   if (!user) return <Login theme={currentTheme} />;
 
   const themeStyles = {
@@ -80,12 +89,10 @@ const App = () => {
   return (
     <div style={themeStyles} className="flex h-screen bg-[var(--bg)] text-white overflow-hidden transition-colors duration-700">
       
-      {/* MOBILE OVERLAY */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[90] lg:hidden" onClick={() => setSidebarOpen(false)}></div>
       )}
 
-      {/* SIDEBAR */}
       <aside className={`fixed lg:relative z-[100] h-full w-72 bg-[#050a18]/60 border-r border-white/5 transition-transform duration-500 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-8 h-full flex flex-col">
           <div className="mb-12">
@@ -108,9 +115,7 @@ const App = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
       <main className="flex-1 overflow-y-auto relative p-6 lg:p-12 pt-24 lg:pt-12 main-content">
-        {/* Mobile Navbar */}
         <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[var(--bg)]/90 backdrop-blur-xl border-b border-white/5 z-50 flex items-center justify-between px-6">
           <h1 className="text-xl font-black italic">EDUPRO<span className="text-[var(--primary)]">.</span></h1>
           <button onClick={() => setSidebarOpen(true)} className="p-2 text-[var(--primary)] bg-white/5 rounded-xl">
